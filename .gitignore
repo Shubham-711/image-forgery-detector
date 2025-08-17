@@ -1,0 +1,22 @@
+# Python virtual environment
+venv-py310-tf/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE/Editor specific files
+.vscode/
+.idea/
+tempCodeRunnerFile.py
+
+# OS specific files
+.DS_Store
+
+# User-generated content folders (your app creates these)
+uploads/
+static/masks/
+archive/

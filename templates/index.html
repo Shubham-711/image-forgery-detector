@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark"> <!-- Enable Bootstrap dark theme -->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Forgery Detection</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Custom CSS (Load After Bootstrap) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container"> <!-- Use standard container for content alignment -->
+            <a class="navbar-brand fs-4" href="#">Forgery Detection AI</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">About</a> <!-- Link to footer section -->
+                    </li>
+                     <li class="nav-item">
+                        <a class="nav-link" href="#limitations">Limitations</a> <!-- Link to footer section -->
+                    </li>
+                    <!-- Add other links as needed -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area - Focused on Upload -->
+    <div class="container container-main">
+        <div class="upload-section">
+            <div class="upload-card">
+                <h2 class="card-title">Upload & Analyze Image</h2>
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <form method="post" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="imageInput" class="form-label visually-hidden">Select image file:</label> <!-- Hide label visually, keep for accessibility -->
+                        <input class="form-control form-control-lg" type="file" id="imageInput" name="image" accept="image/*" required>
+                    </div>
+                    <div class="d-grid">
+                        <!-- Use custom glow button class -->
+                        <button type="submit" class="btn btn-glow btn-lg">Detect Forgery</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Results Section (Only appears after upload) -->
+        {% if prediction %}
+        <div class="results mt-5 mb-5"> <!-- Add top margin -->
+            <h2 class="text-center mb-4">Prediction Results</h2>
+            <div class="row justify-content-center text-center mb-4">
+                <div class="col-auto">
+                     <!-- Added custom class "classification-alert" -->
+                     <div class="alert classification-alert {{ 'alert-danger' if prediction.classification == 'FORGED' else 'alert-success' }}" role="alert">
+                         <h4 class="alert-heading mb-0 fs-5">Classification:
+                            <span class="{{ 'prediction-forged' if prediction.classification == 'FORGED' else 'prediction-real' }}">
+                                {{ prediction.classification }}
+                            </span>
+                            <small class="d-block fw-light">({{ prediction.forged_percentage }} pixels predicted as forged)</small>
+                         </h4>
+                    </div>
+                </div>
+            </div>
+            <div class="row justify-content-center g-4">
+                <!-- Uploaded Image -->
+                {% if uploaded_image %}
+                <div class="col-md-6 col-lg-5 text-center">
+                     <div class="result-card">
+                        <h3 class="card-title">Uploaded Image</h3>
+                        <img src="{{ url_for('static', filename=uploaded_image) }}" class="result-image" alt="Uploaded Image">
+                    </div>
+                </div>
+                {% endif %}
+                <!-- Predicted Mask -->
+                {% if mask_image %}
+                 <div class="col-md-6 col-lg-5 text-center">
+                      <div class="result-card">
+                        <h3 class="card-title">Predicted Mask</h3>
+                        <img src="{{ url_for('static', filename=mask_image) }}" class="result-image" alt="Predicted Mask">
+                    </div>
+                 </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div> <!-- End container-main -->
+
+
+    <!-- Footer with Information -->
+    <footer class="info-footer" id="about"> <!-- Added ID for nav link -->
+        <div class="container">
+            <div class="row">
+                <!-- About Section -->
+                <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                    <h3>About the Project</h3>
+                    <p>
+                        This tool demonstrates a deep learning approach (U-Net with DCT analysis) to detect common image manipulations like copy-move and splicing forgeries.
+                    </p>
+                </div>
+                <!-- How it Works Section -->
+                <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                    <h3>How It Works</h3>
+                    <ul>
+                        <li>Grayscale & Resize</li>
+                        <li>Block-based DCT Analysis</li>
+                        <li>U-Net Segmentation Model</li>
+                        <li>Thresholding ({{ FORGERY_THRESHOLD * 100 }}%) for Classification</li>
+                    </ul>
+                </div>
+                <!-- Limitations Section -->
+                <div class="col-lg-4 col-md-12" id="limitations"> <!-- Added ID for nav link -->
+                     <h3>Limitations</h3>
+                    <ul>
+                        <li>Dependent on training data diversity.</li>
+                        <li>May miss subtle or novel forgery types.</li>
+                        <li>Sensitive to image quality/compression.</li>
+                        <li>For demonstration purposes only.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+         <div class="footer-bottom">
+            © 2024 AI Forgery Detector - Demonstration
+        </div>
+    </footer>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
