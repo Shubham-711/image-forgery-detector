@@ -48,7 +48,7 @@ Follow these steps to run the project on your local machine.
 
 **2. Clone the Repository:**
 ```bash
-# Replace with your actual repository URL
+
 git clone (https://github.com/Shubham-711/image-forgery-detector.git)
 cd image-forgery-detector
 ```
@@ -111,4 +111,4 @@ The application will be available at **`http://127.0.0.1:5000`**.
 ## ## License
 
 Distributed under the MIT License. See `LICENSE` for more information.
-*(**Note:** You can create a file named `LICENSE` and add the MIT License text to it if you wish.)*
+*(
